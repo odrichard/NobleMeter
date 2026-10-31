@@ -21,10 +21,11 @@
 <button id="share" class="share">Share NobleMeter</button><div class="note">A Noble conversion scale: below 0°C, 2 Noble/°C; above 0°C, 100/38 Noble/°C.</div>
 </main><script>
 const $=id=>document.getElementById(id),c=$('c'),f=$('f'),s=$('slider'),n=$('noble'),r=$('readout');
-function noble(C){return C<=0?C*2:C*(100/38)}
+function snapZero(C){return Math.abs(C)<0.05?0:C}
+function noble(C){C=snapZero(C);return C===0?0:(C<0?C*2:C*(100/38))}
 function ctof(C){return C*9/5+32} function ftoc(F){return(F-32)*5/9}
-function fmt(x,d=1){return Number(x.toFixed(d)).toString()}
-function render(C,src){if(!Number.isFinite(C))return;const F=ctof(C),N=noble(C);n.textContent=(N>0?'+':'')+Math.round(N);r.textContent=`${fmt(C)}°C · ${fmt(F)}°F`;if(src!=='c')c.value=fmt(C);if(src!=='f')f.value=fmt(F);s.value=Math.max(-50,Math.min(38,C))}
+function fmt(x,d=1){x=snapZero(x);return Number(x.toFixed(d)).toString()}
+function render(rawC,src){if(!Number.isFinite(rawC))return;const C=snapZero(rawC),F=ctof(C),N=noble(C);n.textContent=C===0?'0':(N>0?'+':'')+Math.round(N);r.textContent=`${fmt(C)}°C · ${fmt(F)}°F`;if(src!=='c'||C===0)c.value=fmt(C);if(src!=='f'||C===0)f.value=fmt(F);s.value=Math.max(-50,Math.min(38,C))}
 c.addEventListener('input',()=>render(Number(c.value),'c'));f.addEventListener('input',()=>render(ftoc(Number(f.value)),'f'));s.addEventListener('input',()=>render(Number(s.value),'s'));
 $('share').addEventListener('click',async()=>{const data={title:'NobleMeter',text:'Try the Sheldon Noble Temperature Conversion Scale',url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert('NobleMeter link copied.');}}catch(e){}});
 if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');render(0);
