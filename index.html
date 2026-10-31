@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>NobleMeter</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f4f4f1;color:#171717;display:grid;place-items:center}.app{width:min(92vw,430px);padding:28px 20px;text-align:center}.title{font-size:32px;font-weight:850;letter-spacing:-1px}.sub{font-size:13px;color:#666;margin:3px 0 22px}.dial{width:245px;height:245px;margin:auto;border:6px solid #222;border-radius:50%;display:flex;flex-direction:column;justify-content:center;background:#fff;box-shadow:0 10px 30px #0001}.noble{font-size:76px;font-weight:850;line-height:1}.unit{font-size:14px;letter-spacing:2px;color:#666;font-weight:700}.temps{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}.box{text-align:left}.box label{font-size:13px;color:#666}.input{margin-top:5px;background:#fff;border:1px solid #ccc;border-radius:13px;padding:11px;display:flex;align-items:center}.input input{border:0;outline:0;width:100%;font-size:24px;background:transparent}.slider{width:100%;margin:24px 0 8px}.anchors{display:flex;justify-content:space-between;font-size:11px;color:#777}.share{width:100%;margin-top:22px;border:0;border-radius:999px;padding:15px;font-size:17px;font-weight:750;background:#171717;color:white}.note{font-size:11px;color:#888;margin-top:13px}
+</style>
+</head>
+<body><main class="app">
+<div class="title">NobleMeter</div><div class="sub">The Sheldon Noble Temperature Conversion Scale</div>
+<div class="dial"><div class="unit">NOBLE</div><div id="noble" class="noble">0</div><div id="readout" class="unit">0°C · 32°F</div></div>
+<div class="temps"><div class="box"><label>Celsius</label><div class="input"><input id="c" type="number" value="0" step="0.1"><span>°C</span></div></div><div class="box"><label>Fahrenheit</label><div class="input"><input id="f" type="number" value="32" step="0.1"><span>°F</span></div></div></div>
+<input id="slider" class="slider" type="range" min="-50" max="38" value="0" step="0.1">
+<div class="anchors"><span>−50°C = −100</span><span>0°C = 0</span><span>38°C = +100</span></div>
+<button id="share" class="share">Share NobleMeter</button><div class="note">A Noble conversion scale: below 0°C, 2 Noble/°C; above 0°C, 100/38 Noble/°C.</div>
+</main><script>
+const $=id=>document.getElementById(id),c=$('c'),f=$('f'),s=$('slider'),n=$('noble'),r=$('readout');
+function noble(C){return C<=0?C*2:C*(100/38)}
+function ctof(C){return C*9/5+32} function ftoc(F){return(F-32)*5/9}
+function fmt(x,d=1){return Number(x.toFixed(d)).toString()}
+function render(C,src){if(!Number.isFinite(C))return;const F=ctof(C),N=noble(C);n.textContent=(N>0?'+':'')+Math.round(N);r.textContent=`${fmt(C)}°C · ${fmt(F)}°F`;if(src!=='c')c.value=fmt(C);if(src!=='f')f.value=fmt(F);s.value=Math.max(-50,Math.min(38,C))}
+c.addEventListener('input',()=>render(Number(c.value),'c'));f.addEventListener('input',()=>render(ftoc(Number(f.value)),'f'));s.addEventListener('input',()=>render(Number(s.value),'s'));
+$('share').addEventListener('click',async()=>{const data={title:'NobleMeter',text:'Try the Sheldon Noble Temperature Conversion Scale',url:location.href};try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert('NobleMeter link copied.');}}catch(e){}});
+if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');render(0);
+</script></body></html>
